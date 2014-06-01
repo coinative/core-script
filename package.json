@@ -1,12 +1,13 @@
 {
   "name": "core-script",
   "version": "0.0.0",
-  "description": "",
+  "description": "Bitcoin script implementation for NodeJS and browsers",
   "main": "lib/index.js",
-  "author": "",
+  "author": "Ben Shepheard <ben@coinative.com>",
   "license": "MIT",
   "scripts": {
-    "test": "./node_modules/.bin/mocha -r ./test/support/env -R dot ./test && ./node_modules/.bin/karma start"
+    "test": "./node_modules/.bin/mocha -r ./test/support/env -R dot ./test && ./node_modules/.bin/karma start",
+    "test-travis": "./node_modules/.bin/mocha -r ./test/support/env -R spec ./test && ./node_modules/.bin/karma start"
   },
   "devDependencies": {
     "browserify": "^4.1.6",
@@ -22,6 +23,7 @@
     "watchify": "^0.10.2"
   },
   "dependencies": {
-    "buffer": "2.3.0"
+    "buffer": "2.3.0",
+    "core-hash": "git://github.com/coinative/core-hash"
   }
 }
