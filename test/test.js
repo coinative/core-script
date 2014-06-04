@@ -154,18 +154,17 @@ describe('core-script', function () {
     });
   });
 
-  describe('updateBuffer', function () {
+  describe('create', function () {
     function repeat(str, times) {
       return new Buffer(new Array(times + 1).join(str));
     }
 
     it('opcodes', function () {
-      var script = new Script();
-      Object.keys(opcodes).forEach(function (opcode) {
-        script.writeChunk(opcodes[opcode]);
+      var script = Script.create(function (script) {
+        Object.keys(opcodes).forEach(function (opcode) {
+          script.writeChunk(opcodes[opcode]);
+        });
       });
-      script.updateBuffer();
-
       var opcodeValues = Object.keys(opcodes).map(function (opcode) {
         return opcodes[opcode];
       });
@@ -174,35 +173,35 @@ describe('core-script', function () {
     });
 
     it('length - length < 0x4c', function () {
-      var script = new Script();
-      script.writeChunk(repeat('0', 0x4b));
-      script.updateBuffer();
+      var script = Script.create(function (script) {
+        script.writeChunk(repeat('0', 0x4b));
+      });
       expect(script.buffer.toString('hex'))
         .to.equal('4b' + repeat('0', 0x4b).toString('hex'));
     });
 
     it('OP_PUSHDATA1(0x4c) - 0x4c < length <= 0xff', function () {
-      var script = new Script();
-      script.writeChunk(repeat('0', 0x4c));
-      script.writeChunk(repeat('1', 0xff));
-      script.updateBuffer();
+      var script = Script.create(function (script) {
+        script.writeChunk(repeat('0', 0x4c));
+        script.writeChunk(repeat('1', 0xff));
+      });
       expect(script.buffer.toString('hex'))
         .to.equal('4c4c' + repeat('0', 0x4c).toString('hex') + '4cff' + repeat('1', 0xff).toString('hex'));
     });
 
     it('OP_PUSHDATA2(0x4d) - 0xff < length <= 0xffff', function () {
-      var script = new Script();
-      script.writeChunk(repeat('0', 0x100));
-      script.writeChunk(repeat('1', 0xffff));
-      script.updateBuffer();
+      var script = Script.create(function (script) {
+        script.writeChunk(repeat('0', 0x100));
+        script.writeChunk(repeat('1', 0xffff));
+      });
       expect(script.buffer.toString('hex'))
         .to.equal('4d0100' + repeat('0', 0x100).toString('hex') + '4dffff' + repeat('1', 0xffff).toString('hex'));
     });
 
     it('OP_PUSHDATA4(0x4e) - 0xffff < length', function () {
-      var script = new Script();
-      script.writeChunk(repeat('0', 0x10000));
-      script.updateBuffer();
+      var script = Script.create(function (script) {
+        script.writeChunk(repeat('0', 0x10000));
+      });
       expect(script.buffer.toString('hex'))
         .to.equal('4e00010000' + repeat('0', 0x10000).toString('hex'));
     });
