@@ -21,12 +21,22 @@ var scripts = {
     '044dffff01',
     '014e',
     '064effffffff', // Too few bytes
+    // Beyond buffer length
+    '4c',
+    '4c01',
+    '4d00',
+    '4d0001',
+    '4e000000',
+    '4e00000001',
     // Random junk
+    '',
+    '01',
     '03630f7ed2f576',
     '4494c03f4786a2289d',
     'ec54dc118007b466c596066afdbd8764',
     '062058ea6e975ebdbad94b5e2acc8500c44f',
-    '21d053e5a71bcde816e0da04feea36caf7ae489670e5951b4895d9e80d70df8ba0693cc8e55440c227eb102c6b804fb0edd5'
+    '21d053e5a71bcde816e0da04feea36caf7ae489670e5951b4895d9e80d70df8ba0693cc8e55440c227eb102c6b804fb0edd5',
+    '4c10f1fcc01733ec4f20ff98cf5026f6651648dd39c5c93c2a894acc0afaece408f085aabf8288d259386fdc5164642094e5'
   ]
 };
 Object.keys(scripts).forEach(function (type) {
@@ -141,6 +151,60 @@ describe('core-script', function () {
       scripts.nonstandard.forEach(function (script) {
         expect(new Script(script).capture()).to.not.exist;
       });
+    });
+  });
+
+  describe('updateBuffer', function () {
+    function repeat(str, times) {
+      return new Buffer(new Array(times + 1).join(str));
+    }
+
+    it('opcodes', function () {
+      var script = new Script();
+      Object.keys(opcodes).forEach(function (opcode) {
+        script.writeChunk(opcodes[opcode]);
+      });
+      script.updateBuffer();
+
+      var opcodeValues = Object.keys(opcodes).map(function (opcode) {
+        return opcodes[opcode];
+      });
+      expect(script.buffer.toString('hex'))
+        .to.equal(new Buffer(opcodeValues).toString('hex'));
+    });
+
+    it('length - length < 0x4c', function () {
+      var script = new Script();
+      script.writeChunk(repeat('0', 0x4b));
+      script.updateBuffer();
+      expect(script.buffer.toString('hex'))
+        .to.equal('4b' + repeat('0', 0x4b).toString('hex'));
+    });
+
+    it('OP_PUSHDATA1(0x4c) - 0x4c < length <= 0xff', function () {
+      var script = new Script();
+      script.writeChunk(repeat('0', 0x4c));
+      script.writeChunk(repeat('1', 0xff));
+      script.updateBuffer();
+      expect(script.buffer.toString('hex'))
+        .to.equal('4c4c' + repeat('0', 0x4c).toString('hex') + '4cff' + repeat('1', 0xff).toString('hex'));
+    });
+
+    it('OP_PUSHDATA2(0x4d) - 0xff < length <= 0xffff', function () {
+      var script = new Script();
+      script.writeChunk(repeat('0', 0x100));
+      script.writeChunk(repeat('1', 0xffff));
+      script.updateBuffer();
+      expect(script.buffer.toString('hex'))
+        .to.equal('4d0100' + repeat('0', 0x100).toString('hex') + '4dffff' + repeat('1', 0xffff).toString('hex'));
+    });
+
+    it('OP_PUSHDATA4(0x4e) - 0xffff < length', function () {
+      var script = new Script();
+      script.writeChunk(repeat('0', 0x10000));
+      script.updateBuffer();
+      expect(script.buffer.toString('hex'))
+        .to.equal('4e00010000' + repeat('0', 0x10000).toString('hex'));
     });
   });
 });
