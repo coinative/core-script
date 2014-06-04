@@ -1,6 +1,8 @@
 var Script = require('../');
 var opcodes = Script.opcodes;
 
+function hex(hex) { return new Buffer(hex, 'hex'); }
+
 var scripts = {
   // e2769b09e784f32f62ef849763d4f45b98e07ba658647343b915ff832b110436/0
   pubkeyhash: '76a914badeecfdef0507247fc8f74241d73bc039972d7b88ac',
@@ -49,7 +51,7 @@ Object.keys(scripts).forEach(function (type) {
   }
 });
 
-describe('core-script', function () {
+describe('Script', function () {
   describe('parse', function () {
     it('pubkeyhash', function () {
       var script = new Script(new Buffer(scripts.pubkeyhash, 'hex'));
@@ -205,5 +207,31 @@ describe('core-script', function () {
       expect(script.buffer.toString('hex'))
         .to.equal('4e00010000' + repeat('0', 0x10000).toString('hex'));
     });
+  });
+
+  it('2 of 3 multisig script hash', function () {
+    var keys = [
+      hex('02b2b9815744d0c95bb3fa82db4563757f5223379cb16f6b4ecbab5677527f0552'),
+      hex('03a7e75f1c9093622d16ecb9dee45b2f8ef10c84f7bfcd2d0ce29017ed97b9a52c'),
+      hex('0331a136cb2190f9b576d16596cf10bdda3e75504e7021caa0921fc809e7756100')
+    ];
+
+    var signatures = [
+      hex('30440220515a7e94aec5afddc05067e47f91b799301b2f613ac2ec2c76e224a4af7b614f022000c17bcb87eab038c023a968877702acc2fcebb7fc68eda680ac166b1b1e4e2201'),
+      hex('30450220352dbd98e01cbdac931d868a62ca5abe5494ffc7a6da3e863f7e239a4a204aa0022100eb8198d942d745bdccbc6c3e61f5aa3f7e6855295de96484c308972cf025d92d01')
+    ];
+
+    var redeemOutput = Script.createMultisigOutput(2, keys);
+    var redeemInput = Script.createMultisigInput(signatures);
+    var inputScript = Script.createScriptHashInput(redeemInput, redeemOutput);
+
+    expect(redeemOutput.buffer.toString('hex')).to.equal('522102b2b9815744d0c95bb3fa82db4563757f5223379cb16f6b4ecbab5677527f05522103a7e75f1c9093622d16ecb9dee45b2f8ef10c84f7bfcd2d0ce29017ed97b9a52c210331a136cb2190f9b576d16596cf10bdda3e75504e7021caa0921fc809e775610053ae');
+    expect(redeemInput.buffer.toString('hex')).to.equal('004730440220515a7e94aec5afddc05067e47f91b799301b2f613ac2ec2c76e224a4af7b614f022000c17bcb87eab038c023a968877702acc2fcebb7fc68eda680ac166b1b1e4e22014830450220352dbd98e01cbdac931d868a62ca5abe5494ffc7a6da3e863f7e239a4a204aa0022100eb8198d942d745bdccbc6c3e61f5aa3f7e6855295de96484c308972cf025d92d01')
+    expect(inputScript.buffer.toString('hex')).to.equal('004730440220515a7e94aec5afddc05067e47f91b799301b2f613ac2ec2c76e224a4af7b614f022000c17bcb87eab038c023a968877702acc2fcebb7fc68eda680ac166b1b1e4e22014830450220352dbd98e01cbdac931d868a62ca5abe5494ffc7a6da3e863f7e239a4a204aa0022100eb8198d942d745bdccbc6c3e61f5aa3f7e6855295de96484c308972cf025d92d014c69522102b2b9815744d0c95bb3fa82db4563757f5223379cb16f6b4ecbab5677527f05522103a7e75f1c9093622d16ecb9dee45b2f8ef10c84f7bfcd2d0ce29017ed97b9a52c210331a136cb2190f9b576d16596cf10bdda3e75504e7021caa0921fc809e775610053ae')
+  });
+
+  it('createNullDataOutput', function () {
+    var script = Script.createNullDataOutput(new Buffer('hello'));
+    expect(script.buffer.toString('hex')).to.equal('6a0568656c6c6f')
   });
 });
