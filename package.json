@@ -24,6 +24,6 @@
   },
   "dependencies": {
     "buffer": "2.3.0",
-    "satoshi-hash": "git://github.com/coinative/satoshi-hash"
+    "satoshi-hash": "0.0.1"
   }
 }
