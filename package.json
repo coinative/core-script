@@ -1,5 +1,5 @@
 {
-  "name": "core-script",
+  "name": "satoshi-script",
   "version": "0.0.0",
   "description": "Bitcoin script implementation for NodeJS and browsers",
   "main": "lib/index.js",
@@ -24,6 +24,6 @@
   },
   "dependencies": {
     "buffer": "2.3.0",
-    "core-hash": "git://github.com/coinative/core-hash"
+    "satoshi-hash": "git://github.com/coinative/satoshi-hash"
   }
 }
