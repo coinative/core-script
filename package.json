@@ -1,6 +1,6 @@
 {
   "name": "satoshi-script",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Bitcoin script implementation for NodeJS and browsers",
   "main": "lib/index.js",
   "author": "Ben Shepheard <ben@coinative.com>",
