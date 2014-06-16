@@ -3,7 +3,10 @@
   "version": "0.0.2",
   "description": "Bitcoin script implementation for NodeJS and browsers",
   "main": "lib/index.js",
-  "author": "Ben Shepheard <ben@coinative.com>",
+  "contributors": [
+    "Ben Shepheard <ben@coinative.com>",
+    "Dan Howitt <dan@coinative.com>"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/coinative/satoshi-script.git"
